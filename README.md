@@ -104,8 +104,8 @@ Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
 $ docker-compose up
 
 # db schema initialization/migration bootstrap
-$ docker exec -i <db_container_name> psql -U <db_user> -d <db_name> < scripts/db-schema-init.sql
-$ docker exec -i gatekeep-backend-db-1 psql -U gatekeep -d gatekeep < scripts/db-schema-init.sql
+$ docker exec -i <db_container_name> psql -U <db_user> -d <db_name> < migrations/<file_name>.sql
+$ docker exec -i gatekeep-backend-db-1 psql -U gatekeep -d gatekeep < migrations/001_init.sql
 
 # development
 $ yarn run start
