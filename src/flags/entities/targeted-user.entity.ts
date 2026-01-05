@@ -6,12 +6,12 @@ import {
   JoinColumn,
   Unique,
 } from 'typeorm';
-import { FeatureFlag } from './feature_flag.entity';
-import { User } from 'src/user/entities/user.entity';
+import { FeatureFlagEntity } from './feature_flag.entity';
+import { UserEntity } from 'src/user/entities/user.entity';
 
 @Entity('targeted_users')
 @Unique(['flagId', 'userId'])
-export class TargetedUser {
+export class TargetedUserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -21,15 +21,15 @@ export class TargetedUser {
   @Column({ name: 'user_id' })
   userId: string;
 
-  @ManyToOne(() => FeatureFlag, (flag) => flag.targetedUsers, {
+  @ManyToOne(() => FeatureFlagEntity, (flag) => flag.targetedUsers, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'flag_id' })
-  flag: FeatureFlag;
+  flag: FeatureFlagEntity;
 
-  @ManyToOne(() => User, (user) => user.targetedUsers, {
+  @ManyToOne(() => UserEntity, (user) => user.targetedUsers, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user: UserEntity;
 }

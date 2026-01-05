@@ -6,10 +6,10 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { FeatureFlag } from './feature_flag.entity';
+import { FeatureFlagEntity } from './feature_flag.entity';
 
 @Entity('audit_log')
-export class AuditLog {
+export class AuditLogEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -28,7 +28,7 @@ export class AuditLog {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @ManyToOne(() => FeatureFlag)
+  @ManyToOne(() => FeatureFlagEntity)
   @JoinColumn({ name: 'flag_id' })
-  flag: FeatureFlag;
+  flag: FeatureFlagEntity;
 }

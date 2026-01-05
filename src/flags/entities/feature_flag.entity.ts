@@ -6,11 +6,11 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { TargetedUser } from './targeted-user.entity';
+import { TargetedUserEntity } from './targeted-user.entity';
 import { IsInt, Max, Min } from 'class-validator';
 
 @Entity('feature_flags')
-export class FeatureFlag {
+export class FeatureFlagEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -42,6 +42,6 @@ export class FeatureFlag {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => TargetedUser, (target) => target.flag)
-  targetedUsers: TargetedUser[];
+  @OneToMany(() => TargetedUserEntity, (target) => target.flag)
+  targetedUsers: TargetedUserEntity[];
 }

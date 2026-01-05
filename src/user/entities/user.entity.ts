@@ -1,4 +1,4 @@
-import { TargetedUser } from 'src/flags/entities/targeted-user.entity';
+import { TargetedUserEntity } from 'src/flags/entities/targeted-user.entity';
 import {
   Entity,
   PrimaryColumn,
@@ -10,7 +10,7 @@ import {
 
 @Entity('users')
 @Check(`id ~ '^(tenant|user|anon):[a-fA-F0-9\\-]{36}$'`)
-export class User {
+export class UserEntity {
   @PrimaryColumn()
   id: string;
 
@@ -20,6 +20,6 @@ export class User {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => TargetedUser, (targetedUser) => targetedUser.user)
-  targetedUsers: TargetedUser[];
+  @OneToMany(() => TargetedUserEntity, (targetedUser) => targetedUser.user)
+  targetedUsers: TargetedUserEntity[];
 }
