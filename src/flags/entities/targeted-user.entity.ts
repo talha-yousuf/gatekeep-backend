@@ -7,6 +7,7 @@ import {
   Unique,
 } from 'typeorm';
 import { FeatureFlag } from './feature_flag.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity('targeted_users')
 @Unique(['flagId', 'userId'])
