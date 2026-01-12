@@ -8,11 +8,13 @@ import {
   Param,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { FlagsService } from './flags.service';
 import { CreateFlagDto, UpdateFlagDto } from './dto/flags.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { AdminUserResponseDto } from 'src/admin-user/dto/admin-user.dto';
 
 @Controller('flags')
 export class FlagsController {
@@ -31,25 +33,41 @@ export class FlagsController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  create(@Body() dto: CreateFlagDto) {
-    // todo: get actorId from auth context
-    const actorId = 'system';
+  create(
+    @Body() dto: CreateFlagDto,
+    @Request()
+    req: {
+      user: AdminUserResponseDto;
+    },
+  ) {
+    const actorId = req.user.username;
     return this.flagsService.createFlag(dto, actorId);
   }
 
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
-  update(@Param('id') id: string, @Body() dto: UpdateFlagDto) {
-    // todo: get actorId from auth context
-    const actorId = 'system';
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateFlagDto,
+    @Request()
+    req: {
+      user: AdminUserResponseDto;
+    },
+  ) {
+    const actorId = req.user.username;
     return this.flagsService.updateFlag(+id, dto, actorId);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
-  delete(@Param('id') id: string) {
-    // todo: get actorId from auth context
-    const actorId = 'system';
+  delete(
+    @Param('id') id: string,
+    @Request()
+    req: {
+      user: AdminUserResponseDto;
+    },
+  ) {
+    const actorId = req.user.username;
     return this.flagsService.deleteFlag(+id, actorId);
   }
 
