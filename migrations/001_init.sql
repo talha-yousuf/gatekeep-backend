@@ -43,6 +43,15 @@ CREATE TABLE IF NOT EXISTS
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
 
+CREATE TABLE IF NOT EXISTS
+    admin_user (
+        id SERIAL PRIMARY KEY,
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+
 CREATE INDEX idx_feature_flags_key ON feature_flags (key);
 
 CREATE INDEX idx_targeted_users_flag ON targeted_users (flag_id);
