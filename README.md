@@ -119,13 +119,11 @@ $ yarn run start:prod
 
 todos:
 
-- authentication for admin
-- user API
-- storing a variable in a flag, could be from multiple types
-- cacheing, memory
-- cacheing, reddis
 - documentation
 - UI
 - screenshots
 - write api endpoints test in either curl or post or similar
 - integrate api documentation generator
+- Cache Failure Defaults
+- Minimal Observability, Log evaluation latency, Log cache refresh
+- Soft Delete Flags, deleted_at column
