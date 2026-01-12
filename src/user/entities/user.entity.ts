@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   Check,
   OneToMany,
+  Column,
 } from 'typeorm';
 
 @Entity('users')
@@ -13,6 +14,9 @@ import {
 export class UserEntity {
   @PrimaryColumn()
   id: string;
+
+  @Column({ type: 'text', nullable: false })
+  username: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

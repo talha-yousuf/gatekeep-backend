@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS
 CREATE TABLE IF NOT EXISTS
     users (
         id TEXT PRIMARY KEY CHECK (id ~ '^(tenant|user|anon):[a-fA-F0-9\-]{36}$'),
+        username TEXT NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     );

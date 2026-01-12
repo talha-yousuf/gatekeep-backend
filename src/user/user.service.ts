@@ -8,7 +8,7 @@ export class UserService {
   // -------- Get all users --------
   async getAllUsers() {
     const res = await this.db.query(
-      'SELECT id, created_at, updated_at FROM users ORDER BY created_at DESC',
+      'SELECT id, created_at, updated_at, username FROM users ORDER BY created_at DESC',
     );
     return res.rows as Record<string, any>[];
   }
