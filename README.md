@@ -128,3 +128,4 @@ todos:
 - UI
 - screenshots
 - write api endpoints test in either curl or post or similar
+- integrate api documentation generator
