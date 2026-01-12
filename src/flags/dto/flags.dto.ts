@@ -12,3 +12,12 @@ export class UpdateFlagDto {
   enabled?: boolean;
   rolloutPercentage?: number;
 }
+
+export type FlagDto = {
+  id: number;
+  key: string;
+  enabled: boolean;
+  defaultValue: boolean;
+  rolloutPercentage: number;
+  targetedUsers: Set<string>;
+};

@@ -3,18 +3,24 @@ import { DbService } from '../db/db.service';
 import { CreateFlagDto, UpdateFlagDto } from './dto/flags.dto';
 import { UserDto } from 'src/user/dto/user.dto';
 import * as crypto from 'crypto';
+import { FlagsCacheService } from './flags-cache.service';
 
 @Injectable()
 export class FlagsService {
-  constructor(private readonly db: DbService) {}
+  constructor(
+    private readonly db: DbService,
+    private readonly cache: FlagsCacheService,
+  ) {}
 
   // ------------------ FLAGS CRUD ------------------
 
   async getFlagById(id: number) {
-    const res = await this.db.query('SELECT * FROM feature_flags WHERE id=$1', [
-      id,
-    ]);
-    return res.rows[0] as Record<string, any>;
+    const result = await this.db.query(
+      'SELECT * FROM feature_flags WHERE id=$1',
+      [id],
+    );
+
+    return result.rows[0] as Record<string, any>;
   }
 
   async createFlag(dto: CreateFlagDto, actorId: string) {
@@ -33,6 +39,7 @@ export class FlagsService {
 
     const createdFlag = result.rows[0] as Record<string, any>;
 
+    await this.cache.refreshCache();
     await this.logAudit(createdFlag.id as number, actorId, null, createdFlag);
 
     return createdFlag;
@@ -61,7 +68,9 @@ export class FlagsService {
 
     const updatedFlag = result.rows[0] as Record<string, any>;
 
+    await this.cache.refreshCache();
     await this.logAudit(id, actorId, before, updatedFlag);
+
     return updatedFlag;
   }
 
@@ -70,29 +79,41 @@ export class FlagsService {
     if (!before) throw new Error('Flag not found');
 
     await this.db.query('DELETE FROM feature_flags WHERE id=$1', [id]);
+
+    await this.cache.refreshCache();
     await this.logAudit(id, actorId, before, null);
+
     return { deleted: true };
   }
 
-  async getAllFlags() {
-    const result = await this.db.query('SELECT * FROM feature_flags');
-    return result.rows as Record<string, any>[];
+  getAllFlags() {
+    // const result = await this.db.query('SELECT * FROM feature_flags');
+    // return result.rows as Record<string, any>[];
+    return this.cache.getAllFlagsFromCache();
   }
 
   // ------------------ Mapping Users to Flags ------------------
 
   async addTargetUser(flagId: number, dto: UserDto) {
-    return this.db.query(
+    const result = await this.db.query(
       'INSERT INTO targeted_users (flag_id, user_id) VALUES ($1,$2) RETURNING *',
       [flagId, dto.id],
     );
+
+    await this.cache.refreshCache();
+
+    return result;
   }
 
   async removeTargetUser(flagId: number, userId: string) {
-    return this.db.query(
+    const result = await this.db.query(
       'DELETE FROM targeted_users WHERE flag_id=$1 AND user_id=$2',
       [flagId, userId],
     );
+
+    await this.cache.refreshCache();
+
+    return result;
   }
 
   async getTargetedUsers(flagId: number) {
@@ -106,11 +127,11 @@ export class FlagsService {
   // ------------------ Evaluation ------------------
 
   async evaluateFlagsForUser(userId: string) {
-    const result = await this.getAllFlags();
+    const result = this.getAllFlags();
     const evaluated: Record<string, boolean> = {};
 
     for (const flag of result) {
-      evaluated[flag.key as string] = await this.evaluateFlag(flag, userId);
+      evaluated[flag.key] = await this.evaluateFlag(flag, userId);
     }
     return evaluated;
   }

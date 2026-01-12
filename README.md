@@ -116,3 +116,14 @@ $ yarn run start:dev
 # production mode
 $ yarn run start:prod
 ```
+
+todos:
+
+- authentication for admin
+- user API
+- storing a variable in a flag, could be from multiple types
+- cacheing, memory
+- cacheing, reddis
+- documentation
+- UI
+- screenshots
