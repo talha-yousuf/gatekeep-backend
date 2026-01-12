@@ -47,11 +47,13 @@ CREATE TABLE IF NOT EXISTS
 CREATE TABLE IF NOT EXISTS
     admin_user (
         id SERIAL PRIMARY KEY,
-        username TEXT UNIQUE NOT NULL,
+        username VARCHAR(255) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
     );
+
+CREATE UNIQUE INDEX admin_user_username_unique_ci ON admin_user (LOWER(username));
 
 CREATE INDEX idx_feature_flags_key ON feature_flags (key);
 

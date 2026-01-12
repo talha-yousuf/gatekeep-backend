@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { DbService } from 'src/db/db.service';
 import {
   AdminUserResponseDto,
@@ -37,5 +38,33 @@ export class AdminUserService {
     }
 
     return user as AdminUserResponseDto;
+  }
+
+  async createUser(
+    username: string,
+    password: string,
+  ): Promise<AdminUserResponseWithHashDto> {
+    // Check existence case-insensitive
+    const existing = await this.db.query(
+      'SELECT id FROM admin_user WHERE LOWER(username) = LOWER($1)',
+      [username],
+    );
+
+    if (existing.rows.length > 0) {
+      throw new Error('Username already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const usernameLower = username.toLowerCase();
+
+    const result = await this.db.query(
+      `INSERT INTO admin_user (username, password_hash, created_at, updated_at)
+     VALUES ($1, $2, NOW(), NOW())
+     RETURNING id, username, password_hash, created_at, updated_at`,
+      [usernameLower, hashedPassword],
+    );
+
+    return result.rows[0] as AdminUserResponseWithHashDto;
   }
 }
