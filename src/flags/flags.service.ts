@@ -175,4 +175,13 @@ export class FlagsService {
       ],
     );
   }
+
+  async getAuditLogs(flagId: number, limit: number) {
+    const res = await this.db.query(
+      'SELECT * FROM audit_log WHERE flag_id=$1 ORDER BY created_at DESC LIMIT $2',
+      [flagId, limit],
+    );
+
+    return res.rows as Record<string, any>[];
+  }
 }
