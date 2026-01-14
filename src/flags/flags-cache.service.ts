@@ -1,6 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { DbService } from 'src/db/db.service';
 import { FlagDto } from './dto/flags.dto';
+import { FeatureFlagDbRecord, TargetedUserDbRecord } from './flags.types';
 
 @Injectable()
 export class FlagsCacheService implements OnModuleInit {
@@ -13,25 +14,12 @@ export class FlagsCacheService implements OnModuleInit {
   }
 
   async refreshCache() {
-    const flagsRes: {
-      rows: Array<{
-        id: number;
-        key: string;
-        enabled: boolean;
-        default_value: boolean;
-        rollout_percentage: number;
-      }>;
-    } = await this.db.query(`
+    const flagsRes = await this.db.query<FeatureFlagDbRecord>(`
       SELECT id, key, enabled, default_value, rollout_percentage
       FROM feature_flags
     `);
 
-    const targetsRes: {
-      rows: Array<{
-        flag_id: number;
-        user_id: string;
-      }>;
-    } = await this.db.query(`
+    const targetsRes = await this.db.query<TargetedUserDbRecord>(`
       SELECT flag_id, user_id FROM targeted_users
     `);
 

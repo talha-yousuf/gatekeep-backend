@@ -9,6 +9,8 @@ import {
   Query,
   UseGuards,
   Request,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { FlagsService } from './flags.service';
 import { CreateFlagDto, UpdateFlagDto } from './dto/flags.dto';
@@ -47,7 +49,7 @@ export class FlagsController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'))
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateFlagDto,
     @Request()
     req: {
@@ -55,38 +57,43 @@ export class FlagsController {
     },
   ) {
     const actorId = req.user.username;
-    return this.flagsService.updateFlag(+id, dto, actorId);
+    return this.flagsService.updateFlag(id, dto, actorId);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
   delete(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Request()
     req: {
       user: AdminUserResponseDto;
     },
   ) {
     const actorId = req.user.username;
-    return this.flagsService.deleteFlag(+id, actorId);
+    return this.flagsService.deleteFlag(id, actorId);
   }
 
   @Post(':id/target')
   @UseGuards(AuthGuard('jwt'))
-  addTarget(@Param('id') id: string, @Body() dto: UserDto) {
-    return this.flagsService.addTargetUser(+id, dto);
+  addTarget(@Param('id', ParseIntPipe) id: number, @Body() userDto: UserDto) {
+    return this.flagsService.addTargetUser(id, userDto);
   }
 
   @Delete(':id/target/:userId')
   @UseGuards(AuthGuard('jwt'))
-  removeTarget(@Param('id') id: string, @Param('userId') userId: string) {
-    return this.flagsService.removeTargetUser(+id, userId);
+  removeTarget(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('userId') userId: string,
+  ) {
+    return this.flagsService.removeTargetUser(id, userId);
   }
 
   @Get(':id/audit')
   @UseGuards(AuthGuard('jwt'))
-  getAudit(@Param('id') id: string, @Query('limit') limit: string) {
-    const l = limit ? parseInt(limit, 10) : 50;
-    return this.flagsService.getAuditLogs(+id, l);
+  getAudit(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+  ) {
+    return this.flagsService.getAuditLogs(id, limit);
   }
 }

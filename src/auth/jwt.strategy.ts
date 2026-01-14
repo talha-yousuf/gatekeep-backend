@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AdminUserService } from 'src/admin-user/admin-user.service';
@@ -30,14 +30,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const userId = payload.sub;
 
     if (!userId) {
-      throw new Error('Invalid JWT payload: missing subject');
+      throw new UnauthorizedException('Invalid JWT payload');
     }
 
-    const user = await this.adminUserService.getById(userId);
-
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = await this.adminUserService.getById(userId).catch(() => {
+      throw new UnauthorizedException('User not found');
+    });
 
     return user;
   }

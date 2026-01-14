@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { FlagsService } from './flags.service';
 import { FlagsController } from './flags.controller';
-import { DbService } from 'src/db/db.service';
+import { DbModule } from 'src/db/db.module';
 import { FlagsCacheService } from './flags-cache.service';
 
 @Module({
-  providers: [FlagsService, DbService, FlagsCacheService],
+  imports: [DbModule],
+  providers: [FlagsService, FlagsCacheService],
   controllers: [FlagsController],
   exports: [FlagsService],
 })

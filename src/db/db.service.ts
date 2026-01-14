@@ -1,5 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Pool } from 'pg';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -19,8 +19,11 @@ export class DbService implements OnModuleInit, OnModuleDestroy {
     console.log('Postgres connected');
   }
 
-  async query(text: string, params?: any[]) {
-    return this.pool.query(text, params);
+  async query<T extends QueryResultRow>(
+    text: string,
+    params?: any[],
+  ): Promise<QueryResult<T>> {
+    return this.pool.query<T>(text, params);
   }
 
   onModuleDestroy() {
