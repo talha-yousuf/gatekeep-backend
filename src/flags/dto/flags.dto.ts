@@ -13,9 +13,12 @@ export class CreateFlagDto {
   @IsString()
   key: string;
 
-  @ApiProperty({ description: 'A description of what the flag is for.' })
+  @ApiPropertyOptional({
+    description: 'A description of what the flag is for.',
+  })
+  @IsOptional()
   @IsString()
-  description: string;
+  description?: string;
 
   @ApiPropertyOptional({
     description: 'The default value of the flag if no other rules match.',
@@ -79,13 +82,21 @@ export class UpdateFlagDto {
 }
 
 export class FlagDto {
-  @ApiProperty({ description: 'The internal ID of the flag.' })
+  @ApiPropertyOptional({ description: 'The internal ID of the flag.' })
+  @IsOptional()
   @IsInt()
-  id: number;
+  id?: number;
 
   @ApiProperty({ description: 'The unique key for the feature flag.' })
   @IsString()
   key: string;
+
+  @ApiPropertyOptional({
+    description: 'A description of what the flag is for.',
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @ApiProperty({ description: 'Whether the flag is currently enabled.' })
   @IsBoolean()

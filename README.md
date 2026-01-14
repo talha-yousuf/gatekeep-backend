@@ -15,6 +15,14 @@ The service is built with [NestJS](https://nestjs.com/), a progressive Node.js f
 - **Auditing:** All changes to feature flags are logged for complete traceability.
 - **High Performance:** Flag evaluation is optimized using an in-memory cache to ensure low latency for client applications.
 
+## Caching Strategy
+
+The `FlagsCacheService` implements an in-memory caching mechanism to optimize feature flag evaluation.
+
+- **Scheduled Refresh (TTL):** The cache automatically refreshes its data from the database every 5 minutes (configurable). This ensures that the cached flags remain relatively up-to-date without requiring manual intervention.
+- **Fail-Safe Evaluation:** In cases where a requested flag is not found in the cache, the system is designed to return a safe, disabled default value. This prevents errors and ensures that unknown or unavailable flags do not disrupt application functionality.
+- **Observability:** Cache operations, including refresh cycles, cache hits, and cache misses, are logged. This provides visibility into the cache's performance and allows for monitoring its effectiveness.
+
 ---
 
 ## Getting Started

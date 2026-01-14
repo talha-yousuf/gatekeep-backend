@@ -10,7 +10,7 @@ The Gatekeep backend is a **modular monolith** built with the **NestJS** framewo
 - **Language**: TypeScript.
 - **Database**: PostgreSQL. Data access is handled through a custom `DbService` that executes raw SQL queries.
 - **Authentication**: Secure JWT (JSON Web Tokens) for administrative users, managed by Passport.js.
-- **Caching**: A singleton, in-memory `FlagsCacheService` is used to cache feature flag configurations to ensure high performance for read-heavy evaluation endpoints.
+- **Caching**: A singleton, in-memory `FlagsCacheService` is used to cache feature flag configurations. It automatically refreshes its data from the database on a schedule (TTL), provides fail-safe evaluation by returning default values for unknown flags, and includes observability for monitoring cache performance and health (hits/misses, refresh times). This ensures high performance for read-heavy evaluation endpoints.
 
 The application is structured into several modules, each encapsulating a specific business domain.
 
@@ -83,7 +83,7 @@ This flow is for client applications (e.g., a frontend app) that need to determi
 3.  **Cache Read**: The `FlagsService` retrieves all flag configurations from the `FlagsCacheService`. This is a fast, in-memory operation.
 4.  **Evaluation Logic**: For each flag, the service runs its evaluation engine:
     a. Checks if the flag is globally `enabled`.
-    b. **(Database Read)** Checks if the user is in the flag's specific target list by querying the `targeted_users` table.
+    b. **(In-Memory Check)** Checks if the user is in the flag's specific target list by querying the *cached* targeted user data.
     c. If not targeted, it calculates if the user falls within the `rollout_percentage`.
     d. If none of the above apply, it returns the `default_value`.
 5.  **Response**: The service returns a key-value object of all flag keys and their final boolean values to the client application.
