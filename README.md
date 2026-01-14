@@ -1,27 +1,96 @@
 # Gatekeep Backend
 
-Gatekeep is a backend service for a powerful and flexible feature flag management system. It allows administrators to control feature rollouts through a secure API, with features like percentage-based rollouts, targeted user-specific flags, and a full audit trail.
+> **Status**: 🚧 In Progress - Demo/Portfolio Project
 
-The service is built with [NestJS](https://nestjs.com/), a progressive Node.js framework for building efficient and scalable server-side applications.
+A feature flag management system built to demonstrate backend system design principles, focusing on deterministic evaluation, cache optimization, and operational safety.
 
-## Features
+---
 
-- **Secure Authentication:** Admin endpoints are protected using JWT-based authentication.
-- **Feature Flag Management:** Full CRUD API for creating, reading, updating, and deleting feature flags.
-- **Flexible Evaluation Logic:**
-  - Enable or disable flags globally.
-  - Target specific users for a given feature.
-  - Roll out features to a percentage of your user base.
-- **Auditing:** All changes to feature flags are logged for complete traceability.
-- **High Performance:** Flag evaluation is optimized using an in-memory cache to ensure low latency for client applications.
+## Motivation
 
-## Caching Strategy
+Modern applications need the ability to:
+- Roll out features gradually to subsets of users
+- Enable or disable functionality instantly without redeployment
+- Target specific users or segments for A/B testing and beta programs
+- Maintain audit trails for compliance and debugging
 
-The `FlagsCacheService` implements an in-memory caching mechanism to optimize feature flag evaluation.
+Gatekeep provides a centralized, API-driven solution for feature flag management with a focus on **low-latency evaluation** and **deterministic behavior**. This project demonstrates core backend engineering concepts including caching strategies, consistent hashing for rollouts, and separation of read/write concerns.
 
-- **Scheduled Refresh (TTL):** The cache automatically refreshes its data from the database every 5 minutes (configurable). This ensures that the cached flags remain relatively up-to-date without requiring manual intervention.
-- **Fail-Safe Evaluation:** In cases where a requested flag is not found in the cache, the system is designed to return a safe, disabled default value. This prevents errors and ensures that unknown or unavailable flags do not disrupt application functionality.
-- **Observability:** Cache operations, including refresh cycles, cache hits, and cache misses, are logged. This provides visibility into the cache's performance and allows for monitoring its effectiveness.
+---
+
+## System Overview
+
+Gatekeep is a backend-only service built with **NestJS** (TypeScript) that exposes RESTful APIs for:
+
+- **Administrative Operations**: Create, update, delete feature flags with JWT-protected endpoints
+- **Flag Evaluation**: High-performance public endpoint for client applications to resolve flag states
+- **User Targeting**: Explicit user-level overrides and percentage-based gradual rollouts
+- **Audit Logging**: Complete traceability of all flag modifications
+
+### Architecture Highlights
+
+- **Cache-First Evaluation**: In-memory cache with dual refresh strategy (event-based + scheduled TTL)
+- **Deterministic Rollouts**: Consistent hashing ensures same user gets same experience across requests
+- **PostgreSQL**: Source of truth for flags, user targets, and audit logs
+- **Raw SQL**: Explicit data access for performance and transparency (no ORM)
+- **Fail-Safe Defaults**: Missing flags resolve to safe disabled values without blocking requests
+
+### Technology Choices
+
+| Technology | Rationale |
+|------------|-----------|
+| **NestJS** | Modular architecture with dependency injection, ideal for maintainable backend services |
+| **PostgreSQL** | ACID compliance for critical configuration data, excellent performance for read-heavy workloads |
+| **JWT Authentication** | Stateless admin authentication, scales horizontally without session storage |
+| **Raw SQL** | Maximum control over queries and performance, simpler than ORM for this use case |
+| **In-Memory Cache** | Sub-millisecond evaluation latency, suitable for single-instance demo (Redis-ready for scale) |
+
+---
+
+## Key Features
+
+### Feature Flag Management
+- Full CRUD operations for feature flags
+- Global enable/disable toggle
+- Default value fallback configuration
+- Percentage-based rollout control (0-100%)
+
+### Evaluation Engine
+- **Deterministic**: Hash-based rollout using `(userId, flagKey)` for consistency
+- **Fast**: In-memory cache serves most requests without database access
+- **Safe**: Unknown flags return disabled state, never throw errors
+- **Priority Logic**:
+  1. Global enable check
+  2. Explicit user targeting (if configured)
+  3. Rollout percentage calculation
+  4. Default value fallback
+
+### Operational Features
+- **Secure Admin API**: JWT-based authentication for management endpoints
+- **Audit Trail**: All flag changes logged with timestamps and actor information
+- **Cache Strategy**: Automatic refresh on schedule (5 min TTL) + event-based invalidation on updates
+- **API Documentation**: Interactive Swagger UI for all endpoints
+
+---
+
+## Design Decisions & Tradeoffs
+
+### What's Included
+✅ Core feature flag logic with deterministic evaluation  
+✅ JWT authentication for admin operations  
+✅ Audit logging for compliance  
+✅ In-memory caching for performance  
+✅ Percentage rollouts with consistent hashing  
+✅ User-specific targeting  
+
+### What's Excluded (By Design)
+❌ **Distributed caching** - Single-instance in-memory cache (Redis migration is straightforward)  
+❌ **Frontend UI** - Backend-focused demonstration  
+❌ **Analytics/metrics** - No exposure tracking or experiment analysis  
+❌ **Complex auth** - Simple JWT only, no OAuth/SSO  
+❌ **Historical versioning** - No soft deletes or flag history beyond audit log  
+
+These exclusions keep the scope focused on **backend system design fundamentals** rather than building a complete platform.
 
 ---
 
@@ -29,126 +98,179 @@ The `FlagsCacheService` implements an in-memory caching mechanism to optimize fe
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [Node.js](https://nodejs.org/) v18 or higher
 - [Yarn](https://yarnpkg.com/)
 - [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/)
 
-### 1. Installation
+### Installation
 
-Clone the repository and install the dependencies:
+1. **Clone the repository**
 
-```bash
-git clone <repository-url>
-cd gatekeep-backend
-yarn install
-```
+   ```bash
+   git clone <repository-url>
+   cd gatekeep-backend
+   ```
 
-### 2. Environment Configuration
+2. **Install dependencies**
 
-Create a `.env` file in the root of the project and add the following environment variables. A `docker-compose.yml` is included for running a local PostgreSQL database.
+   ```bash
+   yarn install
+   ```
 
-```env
-# Database Connection URL
-DATABASE_URL=postgres://gatekeep:gatekeep@localhost:5432/gatekeep
+3. **Configure environment**
 
-# JWT Secret for signing authentication tokens
-JWT_SECRET=your-super-secret-key
+   Create a `.env` file in the project root:
 
-# Port for the application
-PORT=3000
-```
+   ```env
+   # Database Connection
+   DATABASE_URL=postgres://gatekeep:gatekeep@localhost:5432/gatekeep
 
-### 3. Database Setup
+   # JWT Secret (use a strong secret in production)
+   JWT_SECRET=your-super-secret-key
 
-1.  **Start the database container:**
+   # Application Port
+   PORT=3000
+   ```
 
-    ```bash
-    docker-compose up -d
-    ```
+4. **Start the database**
 
-2.  **Run the initial database migration:**
+   ```bash
+   docker-compose up -d
+   ```
 
-    This command executes the initial SQL script to set up the required tables.
+5. **Run database migrations**
 
-    ```bash
-    docker exec -i gatekeep-backend-db-1 psql -U gatekeep -d gatekeep < migrations/001_init.sql
-    ```
+   Execute the initial schema setup:
+
+   ```bash
+   docker exec -i gatekeep-backend-db-1 psql -U gatekeep -d gatekeep < migrations/001_init.sql
+   ```
+
+6. **Start the application**
+
+   ```bash
+   # Development mode with hot reload
+   yarn start:dev
+
+   # Production mode
+   yarn start:prod
+   ```
+
+   The API will be available at `http://localhost:3000`
 
 ---
 
-## Running the Application
+## API Documentation
 
-```bash
-# Development mode with watch
-yarn run start:dev
+Interactive API documentation is available via **Swagger UI**:
 
-# Production mode
-yarn run start:prod
-```
+📍 **http://localhost:3000/docs**
 
-The application will be running at `http://localhost:3000`.
+The Swagger interface provides:
+- Complete endpoint documentation
+- Request/response schemas
+- Interactive API testing
+- Authentication support for protected endpoints
+
+### Using Protected Endpoints
+
+Admin endpoints require JWT authentication:
+
+1. Send a `POST` request to `/auth/login` with valid credentials to obtain an `access_token`
+2. Click the **"Authorize"** button in Swagger UI
+3. Enter the token in the format: `Bearer YOUR_ACCESS_TOKEN`
+4. Now you can test protected endpoints
+
+### API Overview
+
+| Endpoint | Method | Access | Description |
+|----------|--------|--------|-------------|
+| `/auth/login` | POST | Public | Authenticate and receive JWT |
+| `/flags` | GET | Admin | List all feature flags |
+| `/flags` | POST | Admin | Create a new flag |
+| `/flags/:id` | PUT | Admin | Update a flag |
+| `/flags/:id` | DELETE | Admin | Delete a flag |
+| `/flags/:id/audit` | GET | Admin | View flag modification history |
+| `/flags/:id/target` | POST | Admin | Target specific user for a flag |
+| `/flags/:id/target/:userId` | DELETE | Admin | Remove user targeting |
+| `/flags/evaluate` | GET | Public | Evaluate all flags for a user |
+
+---
 
 ## Running Tests
 
 ```bash
-# Run unit tests
-yarn run test
+# Unit tests
+yarn test
 
-# Run end-to-end (e2e) tests
-yarn run test:e2e
+# End-to-end tests
+yarn test:e2e
 
-# Run test coverage
-yarn run test:cov
+# Test coverage report
+yarn test:cov
 ```
 
-For detailed request/response formats, please refer to the DTOs in the `src` directory.
+Tests cover core business logic including evaluation engine, cache behavior, and critical API flows.
 
 ---
 
-## API Documentation (Swagger)
+## Caching Strategy
 
-This project is equipped with interactive API documentation powered by Swagger UI.
+The `FlagsCacheService` implements a hybrid caching approach:
 
-### Accessing Swagger UI
+### Dual Refresh Mechanism
 
-Once the backend application is running, you can access the Swagger UI in your browser at:
+1. **Scheduled Refresh (TTL-based)**
+   - Automatic cache reload every 5 minutes (configurable)
+   - Ensures eventual consistency even if event triggers fail
+   - Prevents unbounded cache staleness
 
-`http://localhost:3000/docs`
+2. **Event-Based Refresh**
+   - Cache invalidation triggered on flag mutations
+   - Immediate consistency for create/update/delete operations
+   - Minimizes stale data window
 
-This interface allows you to explore all available API endpoints, their expected request formats, and their possible responses.
+### Cache Behavior
 
-### Authenticating in Swagger UI (for protected endpoints)
+- **Cache Hit**: Flag configuration served from memory (< 1ms latency)
+- **Cache Miss**: Flag not found returns safe disabled default value
+- **Observability**: Cache operations logged for monitoring hit/miss rates and refresh cycles
 
-Many endpoints (e.g., for managing feature flags) require authentication via a JSON Web Token (JWT). To test these endpoints directly from Swagger UI:
+### What's Cached
 
-1.  Perform a `POST` request to `/auth/login` with valid admin credentials to obtain an `access_token`.
-2.  Click the "Authorize" button (or the lock icon next to an endpoint) in the Swagger UI.
-3.  In the dialog that appears, select the `bearerAuth (apiKey)` option.
-4.  Enter your JWT `access_token` in the format `Bearer YOUR_JWT_TOKEN_HERE` (replace `YOUR_JWT_TOKEN_HERE` with the actual token you received).
-5.  Click "Authorize" and then "Close".
+- ✅ **Feature flag configurations** (key, enabled status, rollout %, default value)
+- ❌ **User targeting data** (queried from database for immediate effect)
+- ❌ **Audit logs** (append-only, no read optimization needed)
 
-You can now execute requests against protected endpoints.
+**Note**: Current implementation uses in-memory cache suitable for single-instance deployment. Migration to Redis for horizontal scaling is straightforward (see architecture documentation).
 
 ---
 
-## API Endpoints
+## Project Scope
 
-All API endpoints, including detailed request/response schemas, can be explored via the interactive [Swagger UI](#api-documentation-swagger). Below is a high-level overview.
+This project demonstrates proficiency in:
 
-### Authentication
+- **Backend System Design**: Cache-first architecture for read-heavy workloads
+- **Data Consistency**: Deterministic evaluation using consistent hashing
+- **API Design**: Clear separation of public vs. administrative concerns
+- **Operational Safety**: Fail-safe defaults and comprehensive audit logging
+- **Security Fundamentals**: JWT authentication, parameterized SQL queries
+- **Performance Optimization**: In-memory caching, database query control
 
-- `POST /auth/login`: Authenticate an admin user and receive a JWT.
+**Target Use Cases**: Internal tooling, configuration services, platform APIs, and infrastructure-adjacent backend systems.
 
-### Feature Flags (Admin-only)
+---
 
-- `GET /flags`: Get all feature flags.
-- `POST /flags`: Create a new feature flag.
-- `PUT /flags/:id`: Update a feature flag.
-- `DELETE /flags/:id`: Delete a feature flag.
-- `GET /flags/:id/audit`: View the audit history for a flag.
-- `POST /flags/:id/target`: Target a specific user for a flag.
-- `DELETE /flags/:id/target/:userId`: Remove a user from a flag's target list.
+## What's Next
 
-### Flag Evaluation (Public)
+See the architecture documentation for:
+- Detailed system design decisions and tradeoffs
+- Production considerations (Redis, observability, rate limiting)
+- Scalability improvements (horizontal scaling, HA database)
+- Complete data flow diagrams and component interactions
 
-- `GET /flags/evaluate?userId=:userId`: Evaluate all flags for a given user ID and receive a key-value map of the results.
+---
+
+## License
+
+This is a portfolio/demonstration project.
