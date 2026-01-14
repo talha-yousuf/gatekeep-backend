@@ -93,11 +93,39 @@ yarn run test:e2e
 yarn run test:cov
 ```
 
+For detailed request/response formats, please refer to the DTOs in the `src` directory.
+
+---
+
+## API Documentation (Swagger)
+
+This project is equipped with interactive API documentation powered by Swagger UI.
+
+### Accessing Swagger UI
+
+Once the backend application is running, you can access the Swagger UI in your browser at:
+
+`http://localhost:3000/docs`
+
+This interface allows you to explore all available API endpoints, their expected request formats, and their possible responses.
+
+### Authenticating in Swagger UI (for protected endpoints)
+
+Many endpoints (e.g., for managing feature flags) require authentication via a JSON Web Token (JWT). To test these endpoints directly from Swagger UI:
+
+1.  Perform a `POST` request to `/auth/login` with valid admin credentials to obtain an `access_token`.
+2.  Click the "Authorize" button (or the lock icon next to an endpoint) in the Swagger UI.
+3.  In the dialog that appears, select the `bearerAuth (apiKey)` option.
+4.  Enter your JWT `access_token` in the format `Bearer YOUR_JWT_TOKEN_HERE` (replace `YOUR_JWT_TOKEN_HERE` with the actual token you received).
+5.  Click "Authorize" and then "Close".
+
+You can now execute requests against protected endpoints.
+
 ---
 
 ## API Endpoints
 
-A brief overview of the main API endpoints.
+All API endpoints, including detailed request/response schemas, can be explored via the interactive [Swagger UI](#api-documentation-swagger). Below is a high-level overview.
 
 ### Authentication
 
@@ -116,5 +144,3 @@ A brief overview of the main API endpoints.
 ### Flag Evaluation (Public)
 
 - `GET /flags/evaluate?userId=:userId`: Evaluate all flags for a given user ID and receive a key-value map of the results.
-
-For detailed request/response formats, please refer to the DTOs in the `src` directory.

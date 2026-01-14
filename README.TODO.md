@@ -57,9 +57,4 @@ This document lists prioritized suggestions for improving the Gatekeep backend p
   - The `deleteFlag` service method would then set this timestamp instead of removing the row.
   - Update `getAllFlags` and other read queries to exclude flags where `deleted_at` is not null.
 
-### 8. API Documentation
 
-- **Issue:** The API is only documented in the README.
-- **Suggestion:**
-  - Integrate `swagger` (`@nestjs/swagger`) to automatically generate OpenAPI documentation from the controllers and DTOs.
-  - This provides an interactive API explorer and serves as living documentation that stays in sync with the code.
