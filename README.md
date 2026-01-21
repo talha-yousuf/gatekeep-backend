@@ -1,8 +1,35 @@
 # Gatekeep Backend
 
-> **Status**: In Progress
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![Status](https://img.shields.io/badge/status-in%20progress-yellow)
+![NestJS](https://img.shields.io/badge/NestJS-v10-orange)
+![Node.js](https://img.shields.io/badge/node-v18%2B-green)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
+![License](https://img.shields.io/badge/license-Non--Commercial-orange)
 
 Backend for a feature flag management MVP.
+
+---
+
+## Table of Contents
+
+1. [Motivation](#motivation)
+2. [System Overview](#system-overview)
+3. [Tech Stack](#tech-stack)
+4. [Key Features](#key-features)
+   - [Feature Flag Management](#feature-flag-management)
+   - [Evaluation Engine & Caching](#evaluation-engine--caching)
+   - [Operational Features](#operational-features)
+5. [Design Decisions & Tradeoffs](#design-decisions-and-tradeoffs)
+   - [Included](#included)
+   - [Excluded / Planned for Later](#excluded--planned-for-later)
+6. [Getting Started](#getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Installation](#installation)
+7. [API Documentation](#api-documentation)
+8. [Running Tests](#running-tests)
+9. [What's Next](#whats-next)
+10. [License](#license)
 
 ## Motivation
 
@@ -14,7 +41,7 @@ Modern applications need the ability to:
 - Maintain audit trails for compliance and debugging
 - Allowing both technical and non-technical stakeholders to safely manage feature rollouts, experiments, and staged releases.
 
-> **Target Users & Audience:**
+> **Target Users and Audience:**
 >
 > platform engineers, internal tooling engineers, DevOps engineers, backend & frontend engineers, QA engineers, product managers, release managers, and business analysts
 
@@ -81,7 +108,7 @@ The project implements:
 - **Audit Trail**: All flag changes logged with timestamps and actor information
 - **API Documentation**: Swagger UI for interactive API testing
 
-## Design Decisions & Tradeoffs
+## Design Decisions and Tradeoffs
 
 ### Included
 
